@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Change Docx | Universal Document Tools</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- PDF Libraries -->
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- Load docx generation library -->
+    <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
+    <script>
+        // Alias docx generation library immediately
+        window.docxGen = window.docx;
+    </script>
+    <!-- Load docx rendering library -->
+    <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.1.15/dist/docx-preview.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        /* Main App Specific Styles */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background-color: var(--nav-bg);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 1000;
+            box-shadow: 0 2px 10px var(--shadow);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--accent);
+            font-weight: 800;
+            font-size: 1.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-link {
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .nav-link:hover {
+            background-color: var(--bg-secondary);
+            text-decoration: none;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 30px;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .user-profile:hover {
+            background-color: var(--bg-secondary);
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            background-color: var(--accent);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .user-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 0.5rem;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            width: 200px;
+            box-shadow: 0 4px 20px var(--shadow);
+            display: none;
+            flex-direction: column;
+            padding: 0.5rem;
+            z-index: 1001;
+        }
+
+        .user-dropdown.active {
+            display: flex;
+        }
+
+        .dropdown-item {
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            border-radius: 4px;
+            transition: var(--transition);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--bg-secondary);
+        }
+
+        .dropdown-item.logout {
+            color: var(--error);
+        }
+
+        /* Mega Dropdown */
+        .mega-dropdown {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            width: 100%;
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 2rem;
+            display: none;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            z-index: 999;
+            box-shadow: 0 10px 30px var(--shadow);
+            max-height: calc(100vh - 70px);
+            overflow-y: auto;
+        }
+
+        .mega-dropdown.active {
+            display: grid;
+        }
+
+        .mega-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .mega-item:hover {
+            background-color: var(--bg-secondary);
+            transform: translateY(-2px);
+        }
+
+        .mega-icon {
+            font-size: 1.5rem;
+            min-width: 40px;
+            height: 40px;
+            background-color: var(--bg-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+        .mega-content h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .mega-content p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.3;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 120px 2rem 4rem;
+            text-align: center;
+            background-color: var(--bg-secondary);
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            letter-spacing: -1px;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+        }
+
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.5rem 1rem 3.5rem;
+            border-radius: 50px;
+            border: 1px solid var(--border);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px var(--shadow);
+            transition: var(--transition);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 4px 20px rgba(226, 0, 26, 0.15);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        /* Tool Grid */
+        .tool-grid {
+            max-width: 1200px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+        }
+
+        .tool-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            transition: var(--transition);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .tool-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            box-shadow: 0 8px 25px var(--shadow);
+        }
+
+        .tool-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .tool-card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .tool-card p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        /* Tool Panel */
+        .tool-panel-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .tool-panel-overlay.active {
+            display: flex;
+        }
+
+        .tool-panel {
+            background-color: var(--bg-primary);
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            animation: panelIn 0.3s ease forwards;
+        }
+
+        @keyframes panelIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .panel-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--bg-secondary);
+        }
+
+        .panel-header h2 {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .close-panel {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .close-panel:hover {
+            background-color: var(--border);
+            color: var(--text-primary);
+        }
+
+        .panel-body {
+            padding: 2rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 4rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background-color: var(--bg-secondary);
+        }
+
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--accent);
+            background-color: rgba(226, 0, 26, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .upload-text h4 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-text p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .file-list {
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .file-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            word-break: break-all;
+            overflow-wrap: break-word;
+        }
+
+        .file-size {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .remove-file {
+            color: var(--error);
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .options-panel {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background-color: var(--bg-secondary);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .options-title {
+            font-weight: 700;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .process-actions {
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .processing-bar {
+            height: 8px;
+            background-color: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .progress {
+            height: 100%;
+            width: 0;
+            background-color: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        .result-panel {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .result-panel p {
+            word-break: break-all;
+            overflow-wrap: break-word;
+            margin-bottom: 1.5rem;
+        }
+
+        .result-icon {
+            font-size: 4rem;
+            color: var(--success);
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .tool-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        @media (max-width: 768px) {
+            .navbar { padding: 0 1rem; }
+            .nav-links { display: none; }
+            .hero-title { font-size: 2.5rem; }
+            .tool-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+            .tool-panel { max-width: 95%; }
+        }
+
+        @media (max-width: 480px) {
+            .tool-grid { grid-template-columns: 1fr; }
+            .hero-title { font-size: 2rem; }
+        }
+
+        /* About Section */
+        .about-section {
+            padding: 6rem 2rem;
+            background-color: var(--bg-primary);
+            text-align: center;
+        }
+
+        .about-section .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .about-section h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+        }
+
+        .about-section p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto 4rem;
+            line-height: 1.6;
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .about-card {
+            padding: 2rem;
+            background-color: var(--bg-secondary);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+
+        .about-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+
+        .about-card h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+
+        .about-card p {
+            font-size: 0.95rem;
+            margin-bottom: 0;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .about-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+  <script type="module" crossorigin src="/Change-Docx/assets/main-DYpY7mbM.js"></script>
+  <link rel="modulepreload" crossorigin href="/Change-Docx/assets/firebase-config-BXcpKdmt.js">
+  <link rel="stylesheet" crossorigin href="/Change-Docx/assets/firebase-config-CIVEZKDp.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="/" class="logo-link">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+                <span>Change Docx</span>
+            </a>
+            <div class="nav-links">
+                <div id="tools-nav-btn" class="nav-link">Tools</div>
+                <a href="#home" class="nav-link">Home</a>
+                <a href="#about" class="nav-link">About</a>
+            </div>
+        </div>
+        <div class="nav-right">
+            <button id="theme-toggle" class="theme-toggle-btn" style="background:none; border:none; cursor:pointer; color:var(--text-primary);">
+                <svg id="sun-icon" class="hidden" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                <svg id="moon-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            </button>
+            <div id="user-profile-btn" class="user-profile">
+                <div id="user-avatar" class="avatar">?</div>
+                <span id="user-name" class="user-name">Loading...</span>
+                <div id="user-dropdown" class="user-dropdown">
+                    <div id="open-profile-btn" class="dropdown-item">My Account</div>
+                    <div id="open-settings-btn" class="dropdown-item">Settings</div>
+                    <div class="divider" style="margin: 0.5rem 0;"></div>
+                    <div id="logout-btn" class="dropdown-item logout">Sign Out</div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mega Dropdown -->
+    <div id="mega-dropdown" class="mega-dropdown">
+        <!-- Will be populated by JS -->
+    </div>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <h1 class="hero-title">Universal document tools</h1>
+        <p class="hero-subtitle">Convert, merge, and edit any document. Free, fast, and 100% browser-based.</p>
+        <div class="search-container">
+            <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="tool-search" class="search-input" placeholder="Search for a tool (e.g. Merge, Convert, Protect...)">
+        </div>
+    </section>
+
+    <!-- Tool Grid -->
+    <main id="tool-grid" class="tool-grid">
+        <!-- Will be populated by JS -->
+    </main>
+
+    <!-- Tool Panel Overlay -->
+    <div id="tool-panel-overlay" class="tool-panel-overlay">
+        <div class="tool-panel">
+            <div class="panel-header">
+                <h2 id="panel-title-text"><span id="panel-icon"></span> <span id="panel-name">Tool Name</span></h2>
+                <button id="close-panel" class="close-panel">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div id="panel-body" class="panel-body">
+                <div id="upload-zone" class="upload-zone">
+                    <div class="upload-icon">📤</div>
+                    <div class="upload-text">
+                        <h4>Drag & Drop your file here</h4>
+                        <p>or click to browse from your computer</p>
+                    </div>
+                    <input type="file" id="file-input" class="hidden">
+                </div>
+                
+                <div id="active-files" class="file-list"></div>
+                
+                <div id="options-panel" class="options-panel hidden">
+                    <h4 class="options-title">Options</h4>
+                    <div id="tool-options-container"></div>
+                </div>
+
+                <div id="process-actions" class="process-actions hidden">
+                    <button id="process-btn" class="btn btn-primary">Process Document</button>
+                    <div id="processing-bar" class="processing-bar">
+                        <div id="progress" class="progress"></div>
+                    </div>
+                </div>
+
+                <div id="result-panel" class="result-panel">
+                    <div class="result-icon">✅</div>
+                    <h3 id="result-title">Success!</h3>
+                    <p id="result-text">Your file is ready for download.</p>
+                    <div class="process-actions">
+                        <button id="download-btn" class="btn btn-primary">Download File</button>
+                        <button id="reset-btn" class="btn btn-secondary">Process Another File</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Section -->
+    <section id="about" class="about-section">
+        <div class="container">
+            <h2>About Change Docx</h2>
+            <p>Change Docx is your ultimate, 100% free universal document toolkit. We are dedicated to providing powerful, professional-grade document tools to everyone, everywhere, without the burden of expensive subscriptions or hidden fees.</p>
+            <p>Whether you need to convert, merge, split, or protect your documents, our browser-based technology ensures your files are handled with the highest privacy and speed. <strong>Made to handle any document for free, forever.</strong></p>
+            <div class="about-grid">
+                <div class="about-card">
+                    <h3>Free Forever</h3>
+                    <p>All our tools are free to use. No hidden costs, no subscriptions, no credit cards required.</p>
+                </div>
+                <div class="about-card">
+                    <h3>Privacy First</h3>
+                    <p>Your files are processed in your browser whenever possible. We don't store your documents on our servers.</p>
+                </div>
+                <div class="about-card">
+                    <h3>Universal Support</h3>
+                    <p>From PDF to Word, Excel to JPG, we handle a wide range of formats with high-fidelity conversion.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Profile Modal -->
+    <div id="profile-modal-overlay" class="tool-panel-overlay">
+        <div class="tool-panel" style="max-width: 500px;">
+            <div class="panel-header">
+                <h2>👤 My Profile</h2>
+                <button id="close-profile" class="close-panel">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Display Name</label>
+                    <input type="text" id="profile-name" class="search-input" style="padding: 0.75rem 1rem; margin-bottom: 1.5rem;">
+                    
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Bio / About Me</label>
+                    <textarea id="profile-bio" class="search-input" style="padding: 0.75rem 1rem; margin-bottom: 1.5rem; height: 100px; border-radius: 12px; resize: none;"></textarea>
+                    
+                    <button id="save-profile-btn" class="btn btn-primary" style="width: 100%;">Save Profile</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal-overlay" class="tool-panel-overlay">
+        <div class="tool-panel" style="max-width: 500px;">
+            <div class="panel-header">
+                <h2>⚙️ Settings</h2>
+                <button id="close-settings" class="close-panel">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Default Output Format</label>
+                    <select id="setting-default-format" class="search-input" style="padding: 0.75rem 1rem; margin-bottom: 1.5rem; appearance: auto;">
+                        <option value="pdf">PDF</option>
+                        <option value="docx">Word (DOCX)</option>
+                        <option value="xlsx">Excel (XLSX)</option>
+                        <option value="jpg">Image (JPG)</option>
+                    </select>
+                    
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+                        <label style="font-weight: 600;">Auto-download after processing</label>
+                        <input type="checkbox" id="setting-auto-download" style="width: 20px; height: 20px; cursor: pointer;">
+                    </div>
+
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+                        <label style="font-weight: 600;">Enable email notifications</label>
+                        <input type="checkbox" id="setting-notifications" style="width: 20px; height: 20px; cursor: pointer;">
+                    </div>
+                    
+                    <button id="save-settings-btn" class="btn btn-primary" style="width: 100%;">Save Settings</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+</body>
+</html>

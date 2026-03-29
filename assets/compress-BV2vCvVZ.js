@@ -1,0 +1,1 @@
+import{r as c,u as t}from"./main-DYpY7mbM.js";import"./firebase-config-BXcpKdmt.js";async function b(o){const{PDFDocument:s}=window.PDFLib,e=o[0],a=await c(e),r=await s.load(a);t(50);const n=await r.save({useObjectStreams:!0});return t(100),{blob:new Blob([n],{type:"application/pdf"}),fileName:`compressed_${e.name}`}}export{b as process};

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth | Change Docx</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="/Change-Docx/assets/auth-Cm4vqQIh.js"></script>
+  <link rel="modulepreload" crossorigin href="/Change-Docx/assets/firebase-config-BXcpKdmt.js">
+  <link rel="stylesheet" crossorigin href="/Change-Docx/assets/firebase-config-CIVEZKDp.css">
+  <link rel="stylesheet" crossorigin href="/Change-Docx/assets/auth-BDODviqc.css">
+</head>
+<body>
+    <div id="auth-container" class="auth-container">
+        <!-- Branding Section (Left) -->
+        <div class="branding-section">
+            <div class="branding-content">
+                <div class="logo-container">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="logo-icon">
+                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                    <h1 class="app-name">Change Docx</h1>
+                </div>
+                <h2 class="hero-title">All your document tools in one place.</h2>
+                <p class="hero-subtitle">Convert, merge, and edit any document. Free, fast, and 100% browser-based.</p>
+                
+                <div class="tool-preview">
+                    <div class="tool-card blurred">
+                        <span class="tool-icon">📄</span>
+                        <span class="tool-name">Merge PDF</span>
+                    </div>
+                    <div class="tool-card blurred">
+                        <span class="tool-icon">✂️</span>
+                        <span class="tool-name">Split PDF</span>
+                    </div>
+                    <div class="tool-card blurred">
+                        <span class="tool-icon">📉</span>
+                        <span class="tool-name">Compress PDF</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Section (Right) -->
+        <div class="form-section">
+            <div class="theme-toggle-container">
+                <button id="theme-toggle" class="theme-toggle-btn">
+                    <svg id="sun-icon" class="hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                    <svg id="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </button>
+            </div>
+
+            <!-- Landing Panel -->
+            <div id="landing-panel" class="panel active">
+                <h2 class="panel-title">Get Started</h2>
+                <p class="panel-subtitle">Choose how you want to access Change Docx</p>
+                
+                <!-- Iframe Warning -->
+                <div id="iframe-warning" class="iframe-warning hidden">
+                    <p>Running in an iframe? Authentication may be restricted. For the best experience, open in a new tab.</p>
+                    <a href="/auth.html" target="_blank" class="btn btn-secondary btn-sm">Open in New Tab</a>
+                </div>
+
+                <div class="auth-buttons">
+                    <button id="show-register" class="btn btn-primary">Create Free Account</button>
+                    <button id="show-login" class="btn btn-secondary">Sign In</button>
+                </div>
+                <div class="divider"><span>OR</span></div>
+                <button id="google-signin-landing" class="btn btn-google">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo">
+                    Continue with Google
+                </button>
+            </div>
+
+            <!-- Login Panel -->
+            <div id="login-panel" class="panel">
+                <h2 class="panel-title">Welcome Back</h2>
+                <p class="panel-subtitle">Enter your credentials to access your account</p>
+                <form id="login-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="login-email">Email Address</label>
+                        <input type="email" id="login-email" placeholder="name@example.com" required>
+                        <span class="error-msg" id="login-email-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <div class="label-row">
+                            <label for="login-password">Password</label>
+                            <a href="#" id="forgot-password-link" class="link-small">Forgot Password?</a>
+                        </div>
+                        <div class="password-input-container">
+                            <input type="password" id="login-password" placeholder="••••••••" required>
+                            <button type="button" id="toggle-login-password" class="toggle-password-btn">Show</button>
+                        </div>
+                        <span class="error-msg" id="login-password-error"></span>
+                    </div>
+                    <div class="form-options">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="remember-me" checked>
+                            <span class="checkmark"></span>
+                            Remember me
+                        </label>
+                    </div>
+                    <button type="submit" id="login-submit" class="btn btn-primary">Sign In</button>
+                </form>
+                <div class="divider"><span>OR</span></div>
+                <button id="google-signin-login" class="btn btn-google">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo">
+                    Sign in with Google
+                </button>
+                <p class="switch-text">Don't have an account? <a href="#" id="switch-to-register">Register</a></p>
+            </div>
+
+            <!-- Register Panel -->
+            <div id="register-panel" class="panel">
+                <h2 class="panel-title">Create Account</h2>
+                <p class="panel-subtitle">Join Change Docx and manage your documents easily</p>
+                <form id="register-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="register-name">Full Name</label>
+                        <input type="text" id="register-name" placeholder="John Doe" required>
+                        <span class="error-msg" id="register-name-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">Email Address</label>
+                        <input type="email" id="register-email" placeholder="name@example.com" required>
+                        <span class="error-msg" id="register-email-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Password</label>
+                        <div class="password-input-container">
+                            <input type="password" id="register-password" placeholder="••••••••" required>
+                            <button type="button" id="toggle-password" class="toggle-password-btn">Show</button>
+                        </div>
+                        <div class="password-strength-meter">
+                            <div id="strength-bar" class="strength-bar"></div>
+                        </div>
+                        <span class="strength-text" id="strength-text">Password strength</span>
+                        <span class="error-msg" id="register-password-error"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-confirm-password">Confirm Password</label>
+                        <input type="password" id="register-confirm-password" placeholder="••••••••" required>
+                        <span class="error-msg" id="register-confirm-password-error"></span>
+                    </div>
+                    <button type="submit" id="register-submit" class="btn btn-primary">Create Account</button>
+                </form>
+                <div class="divider"><span>OR</span></div>
+                <button id="google-signin-register" class="btn btn-google">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo">
+                    Sign up with Google
+                </button>
+                <p class="switch-text">Already have an account? <a href="#" id="switch-to-login">Sign In</a></p>
+            </div>
+
+            <!-- Verification Panel -->
+            <div id="verify-panel" class="panel">
+                <div class="verify-icon-container">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="verify-icon">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                </div>
+                <h2 class="panel-title">Verify Your Email</h2>
+                <p class="panel-subtitle">We've sent a verification link to <strong id="user-email-display">your email</strong>. Please check your inbox and click the link to activate your account.</p>
+                <div class="verify-actions">
+                    <button id="resend-verification" class="btn btn-secondary">Resend Email</button>
+                    <button id="check-verification" class="btn btn-primary">I've Verified My Email</button>
+                </div>
+                <p class="switch-text"><a href="#" id="sign-out-verify">Sign out and try another email</a></p>
+            </div>
+
+            <!-- Forgot Password Panel -->
+            <div id="forgot-password-panel" class="panel">
+                <h2 class="panel-title">Reset Password</h2>
+                <p class="panel-subtitle">Enter your email and we'll send you a link to reset your password</p>
+                <form id="forgot-password-form" class="auth-form">
+                    <div class="form-group">
+                        <label for="forgot-email">Email Address</label>
+                        <input type="email" id="forgot-email" placeholder="name@example.com" required>
+                        <span class="error-msg" id="forgot-email-error"></span>
+                    </div>
+                    <button type="submit" id="forgot-submit" class="btn btn-primary">Send Reset Link</button>
+                </form>
+                <p class="switch-text">Back to <a href="#" id="back-to-login">Sign In</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+</body>
+</html>
