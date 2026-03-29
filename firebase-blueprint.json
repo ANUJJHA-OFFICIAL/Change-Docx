@@ -1,0 +1,60 @@
+{
+  "entities": {
+    "users": {
+      "title": "User Profile",
+      "description": "Stores user profile data and metadata.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The unique Firebase Auth ID."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The user's full name."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The user's email address."
+        },
+        "photoURL": {
+          "type": "string",
+          "format": "uri",
+          "description": "The user's profile picture URL."
+        },
+        "bio": {
+          "type": "string",
+          "description": "User biography or profile description."
+        },
+        "settings": {
+          "type": "object",
+          "properties": {
+            "defaultFormat": {
+              "type": "string",
+              "enum": ["pdf", "docx", "xlsx", "jpg"]
+            },
+            "autoDownload": {
+              "type": "boolean"
+            },
+            "notifications": {
+              "type": "boolean"
+            }
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the user account was created."
+        }
+      },
+      "required": ["uid", "email"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "users",
+      "description": "Collection of user profile documents."
+    }
+  }
+}
